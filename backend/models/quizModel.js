@@ -18,7 +18,7 @@ const quizSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["Javascript", "React"],
+      enum: ["JavaScript", "React"],
       required: true,
     },
     nextQuestionEndsIn: {
@@ -28,6 +28,10 @@ const quizSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    totalAttempted: {
+      type: Number,
+      default: 0,
     },
   },
   {

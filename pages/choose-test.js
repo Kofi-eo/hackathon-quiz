@@ -3,12 +3,16 @@ import reactLogo from "../public/react.svg";
 import Card from "../components/Layout/Card";
 import Link from "next/link";
 import Button from "../components/Button";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { useRouter } from "next/router";
+import { BsArrowLeft } from "react-icons/bs";
 
 const data = [
   {
     icon: jsLogo,
-    type: "Javascript",
+    type: "JavaScript",
     text: "This section will test your knowledge and skills on vanilla Javascript",
   },
   {
@@ -19,30 +23,38 @@ const data = [
 ];
 
 function ChooseTest() {
-  const [quizType, setQuizType] = useState("Javascript");
+  const router = useRouter();
+  const [quizType, setQuizType] = useState("JavaScript");
 
-  const checkedPreviousType = useRef(false);
-
-  // ensure previous type is checked on page load for quiz continuity
-  useEffect(() => {
-    if (!checkedPreviousType.current) {
-      const previousType = localStorage.getItem("quizType");
-      if (previousType) {
-        setQuizType(JSON.parse(previousType));
-      }
-      checkedPreviousType.current = true;
-    }
-  }, []);
-
-  // update localStorage with current quiz type
-  useEffect(() => {
-    if (checkedPreviousType.current) {
-      localStorage.setItem("quizType", JSON.stringify(quizType));
-    }
-  }, [quizType]);
+  const handleProceed = () => {
+    axios
+      .post("/api/quiz/start", { category: quizType })
+      .then((res) => {
+        router.push(`quiz/${res.data.quiz._id}`);
+      })
+      .catch((err) => {
+        if (err.response.status === 409) {
+          toast.success("Quiz Resumed!");
+          router.push(`quiz/${err?.response?.data?.quiz?._id}`);
+        } else {
+          toast.error(err.response.data.message);
+        }
+      });
+  };
 
   return (
     <section className="flex flex-col bg  gap-5 p-5 max-w-[700px]">
+      <div
+        onClick={() => router.back()}
+        className="fixed top-[5vh] left-[5vh] flex items-center"
+      >
+        <button>
+          <span className="text-white text-2xl">
+            <BsArrowLeft />
+          </span>
+        </button>
+        <span className="ml-2">Go back</span>
+      </div>
       <h1 className="text-4xl md:text-center font-bold">Pick a Test</h1>
       <p className="md:text-center text-lg text-secondary-darkGray max-w-[320px] md:max-w-[750px]">
         In this following sections, we will test your knowledge on certain web
@@ -67,18 +79,20 @@ function ChooseTest() {
       </section>
       <div className="flex mt-5 justify-between gap-9 items-center">
         <Link
-          href=""
+          href="/"
           className="max-w-[320px] text-center w-full border border-secondary-mid rounded-md py-3 bg-[url('../public/back.svg')] bg-no-repeat bg-[center_left_20%]"
         >
           Back
         </Link>
         <Button
+          onClick={handleProceed}
           classes="max-w-[320px] w-full text-center text-center bg-secondary-mid rounded-md py-3 "
           label="Start Quiz"
-        ></Button>
+        />
       </div>
     </section>
   );
 }
 
 export default ChooseTest;
+ChooseTest.auth = true;

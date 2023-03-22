@@ -3,18 +3,20 @@ import React from "react";
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 const Header = ({ className }) => {
   const router = useRouter();
   const [hamburger, setHamburger] = useState(true);
 
+  const { data: session } = useSession();
   function toggleNav() {
     setHamburger(!hamburger);
   }
 
   return (
     <header
-      className={`${className} fixed z-10 top-0 w-full shadow flex items-center justify-between bg-secondary-mid h-[60px] md:px-16 px-8 text-white`}
+      className={`${className} sticky z-10 top-0 w-full shadow flex items-center justify-between bg-secondary-mid h-[60px] md:px-16 px-8 text-white`}
     >
       {/* Name */}
 
@@ -40,12 +42,14 @@ const Header = ({ className }) => {
               Contact{" "}
             </Link>
           </li>
-          <li
-            className="cursor-pointer"
-            onClick={() => signOut().then(() => router.push("/"))}
-          >
-            Sign Out{" "}
-          </li>
+          {session && (
+            <li
+              className="cursor-pointer"
+              onClick={() => signOut().then(() => router.push("/"))}
+            >
+              Sign Out
+            </li>
+          )}
         </ul>
       </nav>
       {/* Hamburger */}

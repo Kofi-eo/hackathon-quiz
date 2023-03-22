@@ -1,6 +1,6 @@
 import getSession from "../backend/getSession";
 import React, { useMemo, useRef } from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import countryCode from "../components/countryCod.json";
@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 import hidePass from "../public/hide-password.svg";
 import showPass from "../public/show-password.svg";
 import Image from "next/image";
+import Link from "next/link";
+import { BsArrowLeft } from "react-icons/bs";
 
 export async function getServerSideProps({ req, res }) {
   const session = await getSession(req, res);
@@ -34,14 +36,13 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const codeInputs = useRef();
   const codes = useMemo(() => countryCode.countries, []);
-  let timeout;
 
   const submitForm = async (e) => {
     e.preventDefault();
 
     // basic input validation
 
-    if (!values.mobile > 11) {
+    if (!values.mobile > 10) {
       toast.error("Invalid phone number!");
       return;
     }
@@ -49,7 +50,7 @@ const SignIn = () => {
       redirect: false,
       mobile: `${selectedCode}${
         values.mobile.startsWith("0")
-          ? values.mobile.replace("0", "")
+          ? values.mobile.toString().replace("0", "")
           : values.mobile
       }`,
       password: values.password,
@@ -59,35 +60,38 @@ const SignIn = () => {
       toast.error(response.error);
     } else {
       toast.success("Login successful");
-      timeout = setTimeout(() => {
-        router.push("/choose-test");
-      }, 1000);
+      router.push("/choose-test");
     }
   };
 
-  useEffect(() => {
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [timeout]);
-
   return (
     <div className="  flex flex-col justify-center w-[90%] max-w-[350px] items-center gap-5">
-      <h2 className="text-4xl mb-3 ">Login</h2>
+      <div
+        onClick={() => router.back()}
+        className="fixed top-[5vh] left-[5vh] flex items-center"
+      >
+        <button>
+          <span className="text-2xl text-white">
+            <BsArrowLeft />
+          </span>
+        </button>
+        <span className="ml-2">Go back</span>
+      </div>
+      <h2 className="mb-3 text-4xl ">Login</h2>
       <p className="">Welcome back, let&apos;s get you started</p>
 
       <form
         onSubmit={submitForm}
-        className="flex w-full flex-col gap-5 p-5  "
+        className="flex flex-col w-full gap-5 p-5 "
         autoComplete="off"
       >
-        <fieldset className="flex flex-col gap-3 min-w-0 ">
+        <fieldset className="flex flex-col min-w-0 gap-3 ">
           <label htmlFor="name" className="text-sm">
             Whatsapp Number
           </label>
-          <div className="flex cursor-pointer mt-2  border bg-transparent rounded-md outline-0 relative border-secondary-darkGray py-1 max-w-full  pl-3 gap-2">
+          <div className="relative flex max-w-full gap-2 py-1 pl-3 mt-2 bg-transparent border rounded-md cursor-pointer outline-0 border-secondary-darkGray">
             <div
-              className="flex items-center focus:border focus:border-black focus:border-solid my-2 w-fit"
+              className="flex items-center my-2 focus:border focus:border-black focus:border-solid w-fit"
               onClick={() => {
                 setShowCodes((prev) => !prev);
                 codeInputs.current.focus();
@@ -139,12 +143,12 @@ const SignIn = () => {
               name="tel"
               maxLength={11}
               placeholder="Whatsapp number"
-              className="bg-transparent flex-auto w-auto focus-within:outline-none focus-within:cursor-text placeholder:text-ellipsis min-w-0"
+              className="flex-auto w-auto min-w-0 bg-transparent focus-within:outline-none focus-within:cursor-text placeholder:text-ellipsis"
             />
           </div>
         </fieldset>
 
-        <fieldset className="flex flex-col gap-3 relative min-w-0 ">
+        <fieldset className="relative flex flex-col min-w-0 gap-3 ">
           <label htmlFor="password" className="text-sm">
             Password
           </label>
@@ -162,7 +166,7 @@ const SignIn = () => {
             required
             autoComplete={"off"}
             id="password"
-            className=" border border-secondary-darkGray px-5 rounded-md py-2 bg-transparent focus-within:outline-none focus-within:cursor-text"
+            className="px-5 py-2 bg-transparent border rounded-md border-secondary-darkGray focus-within:outline-none focus-within:cursor-text"
           />
           <div
             className="absolute top-[42px] right-2"
@@ -175,10 +179,14 @@ const SignIn = () => {
             )}
           </div>
         </fieldset>
-        <button className=" bg-secondary-mid mt-4 py-2 rounded-md">
-          Login
-        </button>
+        <button className="py-2 mt-4 rounded-md bg-secondary-mid">Login</button>
       </form>
+      <p>
+        Don&apos;t have an account yet?{" "}
+        <Link href="/sign-up" className="text-secondary-mid">
+          Sign up
+        </Link>
+      </p>
     </div>
   );
 };

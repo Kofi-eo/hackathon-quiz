@@ -2,6 +2,8 @@ import { toast } from "react-toastify";
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+import Link from "next/link";
+import { BsArrowLeft } from "react-icons/bs";
 
 function SignUp() {
   const router = useRouter();
@@ -49,8 +51,21 @@ function SignUp() {
       });
     setLoading(false);
   };
+
   return (
     <section className="sign-up">
+      <div
+        onClick={() => router.back()}
+        className="fixed top-[5vh] left-[5vh] flex items-center"
+      >
+        <button>
+          <span className="text-white text-2xl">
+            <BsArrowLeft />
+          </span>
+        </button>
+        <span className="ml-2">Go back</span>
+      </div>
+
       <div className="text-center space-y-2">
         <h1>Get Started</h1>
         <p>
@@ -63,7 +78,7 @@ function SignUp() {
           <label>WhatsApp Name</label>
           <input
             type="text"
-            placeholder="@whatsappname"
+            placeholder="@whatsapp name"
             required
             onInput={(e) =>
               setValues((prevValues) => ({
@@ -122,6 +137,12 @@ function SignUp() {
           Register
         </button>
       </form>
+      <p>
+        Already have an account?{" "}
+        <Link href="/sign-in" className="text-secondary-mid">
+          Sign in
+        </Link>
+      </p>
     </section>
   );
 }
